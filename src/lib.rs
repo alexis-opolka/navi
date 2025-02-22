@@ -15,3 +15,5 @@ mod structures;
 mod welcome;
 
 pub use {commands::handle, filesystem::default_config_pathbuf};
+
+mod key_events;

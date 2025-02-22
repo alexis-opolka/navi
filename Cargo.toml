@@ -1,6 +1,6 @@
 [package]
 name = "navi"
-version = "2.24.0"
+version = "2.25.0"
 authors = ["Denis Isidoro <denis_isidoro@live.com>"]
 edition = "2021"
 description = "An interactive cheatsheet tool for the command-line"
@@ -42,6 +42,7 @@ dns_common = { version = "0.2.1", default-features = false, features = [
    "json",
 ] }
 unicode-width = "0.2.0"
+uinput = "0.1.3"
 
 [target.'cfg(windows)'.dependencies]
 dunce = "1"

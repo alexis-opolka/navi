@@ -11,6 +11,7 @@ use std::cell::RefCell;
 use std::path::MAIN_SEPARATOR;
 
 use walkdir::WalkDir;
+use crate::key_events::lib::test;
 
 /// Multiple paths are joint by a platform-specific separator.
 /// FIXME: it's actually incorrect to assume a path doesn't containing this separator
@@ -74,6 +75,9 @@ pub fn default_cheat_pathbuf() -> Result<PathBuf> {
             pathbuf = path;
         }
     }
+
+    test();
+
     Ok(pathbuf)
 }
 
