@@ -42,7 +42,6 @@ jobs:
 
       - name: Check if release exists for push
         id: check_release
-        if: github.event_name == 'push'
         run: |
           if [ '${{ github.event_name }}' == 'push' ]; then
             if gh release view ${{ github.ref_name }} > /dev/null 2>&1; then
