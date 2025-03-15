@@ -57,7 +57,7 @@ jobs:
         run: |
           gh release create ${{ steps.get_version.outputs.VERSION }} \
             --title "Release ${{ steps.get_version.outputs.VERSION }}" \
-            --notes "Release notes for ${{ steps.get_version.outputs.VERSION }}"
+            --notes "Release notes for ${{ steps.get_version.outputs.VERSION }}" \
             --draft
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
