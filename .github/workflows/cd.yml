@@ -50,40 +50,36 @@ jobs:
             else
               echo "RELEASE_EXISTS=false" >> $GITHUB_OUTPUT
             fi
-          else
+          else if [ ${{ github.event_name }} == 'release' ]; then
             if gh release view ${{ github.event.release.tag_name }} > /dev/null 2>&1; then
               echo "RELEASE_EXISTS=true" >> $GITHUB_OUTPUT
             else
               echo "RELEASE_EXISTS=false" >> $GITHUB_OUTPUT
             fi
+          else
+            echo "FAILURE=true" >> $GITHUB_OUTPUT
           fi
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Quit early if no version found
-        id: quit_early_if_no_version
-        if: steps.check_release.outputs.RELEASE_EXISTS == 'false'
-        run: |
-          gh run cancel ${{ github.run_id }}
-          gh run watch ${{ github.run_id }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install target
         id: installtarget
+        if: steps.check_release.outputs.FAILURE == 'false'
         run: rustup target add ${{ matrix.target }}
 
       - name: Build
         id: build
+        if: steps.check_release.outputs.FAILURE == 'false'
         run: scripts/dot rust release ${{ matrix.target }}
 
       - name: Create a release if not already present
-        if: steps.check_release.outputs.RELEASE_EXISTS == 'false'
+        if: steps.check_release.outputs.RELEASE_EXISTS == 'false' && steps.check_release.outputs.FAILURE == 'false'
         run: gh release create ${{ github.ref }} --title "${{ github.ref }}" --notes "This is a minimal draft release note." --draft
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload binaries to release
+        if: steps.check_release.outputs.FAILURE == 'false'
         uses: svenstaro/upload-release-action@v1-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
