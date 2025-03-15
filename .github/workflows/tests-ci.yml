@@ -1,0 +1,16 @@
+name: Test CI Component
+
+on:
+  push:
+
+jobs:
+  test-release-creation:
+    if: github.repository == 'alexis-opolka/navi'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create a release if not already present
+        id: create_release_if_not_present
+        if: "$(gh release view ${{ steps.get_version.outputs.VERSION }} 2>&1)" == "release not found"
+        run: gh release create ${{ steps.get_version.outputs.VERSION }} --title "${{ steps.get_version.outputs.VERSION }}" --notes "This is a minimal draft release note." --draft
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
