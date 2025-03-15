@@ -44,10 +44,23 @@ jobs:
         id: echo_version
         run: echo ${{ github.ref }}
 
-      - name: Check if release exists
+      - name: Check if release exists for push
         id: check_release
+        if: github.event_name == 'push'
         run: |
-          if gh release view ${{ github.ref }} > /dev/null 2>&1; then
+          if gh release view ${{ github.ref_name }} > /dev/null 2>&1; then
+            echo "RELEASE_EXISTS=true" >> $GITHUB_OUTPUT
+          else
+            echo "RELEASE_EXISTS=false" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check if release exists for push
+        id: check_release
+        if: github.event_name == 'release'
+        run: |
+          if gh release view ${{ github.event.release.tag_name }} > /dev/null 2>&1; then
             echo "RELEASE_EXISTS=true" >> $GITHUB_OUTPUT
           else
             echo "RELEASE_EXISTS=false" >> $GITHUB_OUTPUT
