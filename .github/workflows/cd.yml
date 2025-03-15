@@ -35,11 +35,25 @@ jobs:
           - os: macos-latest
             target: aarch64-apple-darwin
     steps:
+      - name: Get the version
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF/refs\/tags\//}" >> GITHUB_OUTPUT
+
+      - name: Quit early if no version found
+        id: quit_early_if_no_version
+        run: |
+          gh run cancel ${{ github.run_id }}
+          gh run watch ${{ github.run_id }}
+        env:
+          GH_TOKEN: ${{ secrets. GITHUB_TOKEN }}
+
       - uses: hecrj/setup-rust-action@v1.3.4
         with:
           rust-version: stable
 
       - uses: actions/checkout@v1
+        with:
+          ref: master
 
       - name: Install target
         id: installtarget
@@ -48,10 +62,6 @@ jobs:
       - name: Build
         id: build
         run: scripts/dot rust release ${{ matrix.target }}
-
-      - name: Get the version
-        id: get_version
-        run: echo "VERSION=${GITHUB_REF/refs\/tags\//}" >> GITHUB_OUTPUT
 
       - name: Check if release exists
         id: check_release
@@ -77,3 +87,6 @@ jobs:
           file: target/tar/navi.${{ steps.build.outputs.EXTENSION }}
           tag: ${{ github.ref }}
           asset_name: navi-${{ steps.get_version.outputs.VERSION }}-${{ matrix.target }}.${{ steps.build.outputs.EXTENSION }}
+
+    permissions:
+      actions: write
