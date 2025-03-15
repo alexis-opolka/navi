@@ -45,7 +45,7 @@ jobs:
 
       - name: Get the version
         id: get_version
-        run: echo "VERSION=${GITHUB_REF/refs\/tags\//}" >> GITHUB_OUTPUT
+        run: echo "VERSION=${GITHUB_REF/refs\/tags\//}" | tee >> GITHUB_OUTPUT
 
       - name: Quit early if no version found
         id: quit_early_if_no_version
