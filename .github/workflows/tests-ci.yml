@@ -8,9 +8,23 @@ jobs:
     if: github.repository == 'alexis-opolka/navi'
     runs-on: ubuntu-latest
     steps:
+      - name: Get the current version
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF/refs\/tags\//}" >> GITHUB_OUTPUT
+
+      - name: Check if release exists
+        id: check_release
+        run: |
+          if gh release view ${{ steps.get_version.outputs.VERSION }} > /dev/null 2>&1; then
+            echo "RELEASE_EXISTS=true" >> $GITHUB_OUTPUT
+          else
+            echo "RELEASE_EXISTS=false" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Create a release if not already present
-        id: test_create_release_if_not_present
-        if: "$(gh release view ${{ steps.get_version.outputs.VERSION }} 2>&1)" == "release not found"
+        if: steps.check_release.outputs.RELEASE_EXISTS == 'false'
         run: gh release create ${{ steps.get_version.outputs.VERSION }} --title "${{ steps.get_version.outputs.VERSION }}" --notes "This is a minimal draft release note." --draft
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
