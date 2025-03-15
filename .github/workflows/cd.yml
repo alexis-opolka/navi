@@ -4,6 +4,9 @@ on:
   push:
     tags:
       - "*"
+  release:
+    types:
+      - released
 
 jobs:
   binary:
@@ -42,7 +45,14 @@ jobs:
         run: scripts/dot rust release ${{ matrix.target }}
       - name: Get the version
         id: get_version
-        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+        run: echo "VERSION=${GITHUB_REF/refs\/tags\//}" >> GITHUB_OUTPUT
+      - name: Create a release if not already present
+        id: create_release_if_not_present
+        run: |
+          if [[ "$(gh release view ${{ steps.get_version.outputs.VERSION }} 2>&1)" == "release not found" ]]; then
+            ### We're only creating a release if one doesn't exist
+            gh release create ${{ steps.get_version.outputs.VERSION }} --draft
+          fi
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v1-release
         with:
