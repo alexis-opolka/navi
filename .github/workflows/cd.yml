@@ -35,6 +35,14 @@ jobs:
           - os: macos-latest
             target: aarch64-apple-darwin
     steps:
+      - uses: hecrj/setup-rust-action@v1.3.4
+        with:
+          rust-version: stable
+
+      - uses: actions/checkout@v1
+        with:
+          ref: master
+
       - name: Get the version
         id: get_version
         run: echo "VERSION=${GITHUB_REF/refs\/tags\//}" >> GITHUB_OUTPUT
@@ -46,14 +54,6 @@ jobs:
           gh run watch ${{ github.run_id }}
         env:
           GH_TOKEN: ${{ secrets. GITHUB_TOKEN }}
-
-      - uses: hecrj/setup-rust-action@v1.3.4
-        with:
-          rust-version: stable
-
-      - uses: actions/checkout@v1
-        with:
-          ref: master
 
       - name: Install target
         id: installtarget
