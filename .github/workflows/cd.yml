@@ -53,6 +53,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create release
+        continue-on-error: true
         if: steps.check_release.outputs.RELEASE_EXISTS == 'false'
         run: |
           gh release create ${{ steps.get_version.outputs.VERSION }} \
