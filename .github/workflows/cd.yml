@@ -74,6 +74,7 @@ jobs:
         uses: svenstaro/upload-release-action@v2
         with:
           draft: true
+          overwrite: true
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: target/tar/navi.${{ steps.build.outputs.EXTENSION }}
           tag: ${{ github.ref }}
