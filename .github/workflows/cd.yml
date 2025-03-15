@@ -58,6 +58,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Upload binaries to release
+        if: "$(gh release view ${{ steps.get_version.outputs.VERSION }} 2>&1)" != "release not found"
         uses: svenstaro/upload-release-action@v1-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
