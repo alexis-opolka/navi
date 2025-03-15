@@ -77,8 +77,8 @@ jobs:
           overwrite: true
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: target/tar/navi.${{ steps.build.outputs.EXTENSION }}
-          tag: ${{ github.ref }}
-          asset_name: navi-${{ github.ref }}-${{ matrix.target }}.${{ steps.build.outputs.EXTENSION }}
+          tag: ${{ steps.get_version.outputs.VERSION }}
+          asset_name: navi-${{ steps.get_version.outputs.VERSION }}-${{ matrix.target }}.${{ steps.build.outputs.EXTENSION }}
 
     permissions:
       actions: write
