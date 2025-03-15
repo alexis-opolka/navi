@@ -40,18 +40,14 @@ jobs:
           rust-version: stable
       - uses: actions/checkout@v1
 
-      - name: Get the version
-        id: get_version
-        run: echo "VERSION=${GITHUB_REF/refs\/tags\//}" >> GITHUB_OUTPUT
-
       - name: Echo the version (test)
         id: echo_version
-        run: echo ${{ steps.get_version.outputs.VERSION }}
+        run: echo ${{ github.ref }}
 
       - name: Check if release exists
         id: check_release
         run: |
-          if gh release view ${{ steps.get_version.outputs.VERSION }} > /dev/null 2>&1; then
+          if gh release view ${{ github.ref }} > /dev/null 2>&1; then
             echo "RELEASE_EXISTS=true" >> $GITHUB_OUTPUT
           else
             echo "RELEASE_EXISTS=false" >> $GITHUB_OUTPUT
@@ -78,7 +74,7 @@ jobs:
 
       - name: Create a release if not already present
         if: steps.check_release.outputs.RELEASE_EXISTS == 'false'
-        run: gh release create ${{ steps.get_version.outputs.VERSION }} --title "${{ steps.get_version.outputs.VERSION }}" --notes "This is a minimal draft release note." --draft
+        run: gh release create ${{ github.ref }} --title "${{ github.ref }}" --notes "This is a minimal draft release note." --draft
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -88,7 +84,7 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: target/tar/navi.${{ steps.build.outputs.EXTENSION }}
           tag: ${{ github.ref }}
-          asset_name: navi-${{ steps.get_version.outputs.VERSION }}-${{ matrix.target }}.${{ steps.build.outputs.EXTENSION }}
+          asset_name: navi-${{ github.ref }}-${{ matrix.target }}.${{ steps.build.outputs.EXTENSION }}
 
     permissions:
       actions: write
