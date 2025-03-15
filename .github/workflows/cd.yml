@@ -45,10 +45,26 @@ jobs:
 
       - name: Get the version
         id: get_version
-        run: echo "VERSION=${GITHUB_REF/refs\/tags\//}" | tee >> GITHUB_OUTPUT
+        run: echo "VERSION=${GITHUB_REF/refs\/tags\//}" >> GITHUB_OUTPUT
+
+      - name: Echo the version (test)
+        id: echo_version
+        run: echo ${{ steps.get_version.outputs.VERSION }}
+
+      - name: Check if release exists
+        id: check_release
+        run: |
+          if gh release view ${{ steps.get_version.outputs.VERSION }} > /dev/null 2>&1; then
+            echo "RELEASE_EXISTS=true" >> $GITHUB_OUTPUT
+          else
+            echo "RELEASE_EXISTS=false" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Quit early if no version found
         id: quit_early_if_no_version
+        if: steps.check_release.outputs.RELEASE_EXISTS == 'false'
         run: |
           gh run cancel ${{ github.run_id }}
           gh run watch ${{ github.run_id }}
