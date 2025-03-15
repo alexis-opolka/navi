@@ -40,12 +40,8 @@ jobs:
           rust-version: stable
       - uses: actions/checkout@v1
 
-      - name: Echo the version (test)
-        id: echo_version
-        run: echo ${{ github.ref }}
-
       - name: Check if release exists for push
-        id: check_release_push
+        id: check_release
         if: github.event_name == 'push'
         run: |
           if [ ${{ github.event_name }} == 'push' ]; then
