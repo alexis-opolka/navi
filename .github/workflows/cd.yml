@@ -38,16 +38,21 @@ jobs:
       - uses: hecrj/setup-rust-action@v1.3.4
         with:
           rust-version: stable
+
       - uses: actions/checkout@v1
+
       - name: Install target
         id: installtarget
         run: rustup target add ${{ matrix.target }}
+
       - name: Build
         id: build
         run: scripts/dot rust release ${{ matrix.target }}
+
       - name: Get the version
         id: get_version
         run: echo "VERSION=${GITHUB_REF/refs\/tags\//}" >> GITHUB_OUTPUT
+
       - name: Check if release exists
         id: check_release
         run: |
@@ -66,7 +71,6 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload binaries to release
-        if: "$(gh release view ${{ steps.get_version.outputs.VERSION }} 2>&1)" != "release not found"
         uses: svenstaro/upload-release-action@v1-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
