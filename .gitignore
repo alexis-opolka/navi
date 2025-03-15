@@ -3,3 +3,4 @@
 navi.log
 
 dist/chocolatey/*/cargo
+*.nupkg
