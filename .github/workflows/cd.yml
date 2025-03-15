@@ -50,7 +50,7 @@ jobs:
             else
               echo "RELEASE_EXISTS=false" >> $GITHUB_OUTPUT
             fi
-          else if [ ${{ github.event_name }} == 'release' ]; then
+          elif [ ${{ github.event_name }} == 'release' ]; then
             if gh release view ${{ github.event.release.tag_name }} > /dev/null 2>&1; then
               echo "RELEASE_EXISTS=true" >> $GITHUB_OUTPUT
             else
