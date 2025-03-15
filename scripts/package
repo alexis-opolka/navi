@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+chocolatey-next(){
+  cargo build --target-dir dist/navi-next/tools
+}
+
+cmd="$1"
+shift
+
+export X_MODE=true
+set -x
+
+case "$cmd" in
+   "choco next") chocolatey-next "$@" ;;
+esac
