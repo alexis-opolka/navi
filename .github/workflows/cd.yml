@@ -38,10 +38,7 @@ jobs:
       - uses: hecrj/setup-rust-action@v1.3.4
         with:
           rust-version: stable
-
       - uses: actions/checkout@v1
-        with:
-          ref: GITHUB_REF
 
       - name: Get the version
         id: get_version
