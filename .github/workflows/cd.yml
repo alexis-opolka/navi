@@ -77,11 +77,14 @@ jobs:
           cargo install cross
           
           cross build --release --target "${{ matrix.target }}"
+          
+          cd target/${{ matrix.target }}/release/
+          
           if is_windows "${{ matrix.target }}"; then
-            zip -r "navi.zip" "target/${{ matrix.target }}/release/navi.exe"
+            zip -r "navi.zip" "navi.exe"
             echo "EXTENSION=zip" >> $GITHUB_OUTPUT
           else
-            tar -czf "navi.tar.gz" "target/${{ matrix.target }}/release/navi"
+            tar -czf "navi.tar.gz" "navi"
             echo "EXTENSION=tar.gz" >> $GITHUB_OUTPUT
           fi
           
