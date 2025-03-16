@@ -6,7 +6,7 @@ $toolsPath = Split-Path $MyInvocation.MyCommand.Definition
 ### Metadata related to the software and package
 $packageName = 'navi'
 $softwareName = 'navi-next'
-$version = '2.24.0-alpha1-security-fix'
+$version = '2.24.0-security'
 
 $alreadyInstalled = (AlreadyInstalled -product $softwareName -version $version)
 $installPath = Get-ChocolateyPath -PathType 'PackagePath'
