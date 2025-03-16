@@ -73,6 +73,8 @@ jobs:
              local -r target="$1"
              echo "$target" | grep -q "windows"
           }
+
+          cargo install cross
           
           cross build --release --target "${{ matrix.target }}"
           if is_windows "${{ matrix.target }}"; then
