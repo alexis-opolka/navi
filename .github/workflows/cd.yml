@@ -68,7 +68,21 @@ jobs:
 
       - name: Build
         id: build
-        run: scripts/dot rust release ${{ matrix.target }}
+        run: |
+          is_windows() {
+             local -r target="$1"
+             echo "$target" | grep -q "windows"
+          }
+          
+          cross build --release --target "${{ matrix.target }}"
+          if is_windows "${{ matrix.target }}"; then
+            zip -r "navi-${{ steps.get_version.outputs.VERSION }}-${{ matrix.target }}.zip" "target/${{ matrix.target }}/release/navi.exe"
+            echo "EXTENSION=zip" >> $GITHUB_OUTPUT
+          else
+            tar -czf "navi-${{ steps.get_version.outputs.VERSION }}-${{ matrix.target }}.zip" "target/${{ matrix.target }}/release/navi"
+            echo "EXTENSION=tar.gz" >> $GITHUB_OUTPUT
+          fi
+          
 
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v1-release
