@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Read this before creating packages: https://docs.chocolatey.org/en-us/create/create-packages -->
+<!-- It is especially important to read the above link to understand additional requirements when publishing packages to the community feed aka dot org (https://community.chocolatey.org/packages). -->
+<!-- Test your packages in a test environment: https://github.com/chocolatey/chocolatey-test-environment -->
+<!--
+This is a nuspec. It mostly adheres to https://docs.nuget.org/create/Nuspec-Reference. Chocolatey uses a special version of NuGet.Core that allows us to do more than was initially possible. As such there are certain things to be aware of:
+
+* the package xmlns schema url may cause issues with nuget.exe
+* Any of the following elements can ONLY be used by choco tools - projectSourceUrl, docsUrl, mailingListUrl, bugTrackerUrl, packageSourceUrl, provides, conflicts, replaces
+* nuget.exe can still install packages with those elements but they are ignored. Any authoring tools or commands will error on those elements
+-->
+<!-- Do not remove this test for UTF-8: if “Ω” doesn’t appear as greek uppercase omega letter enclosed in quotation marks, you should use an editor that supports UTF-8, not this one. -->
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>navi-next</id>
+    <!-- version should MATCH as closely as possible with the underlying software -->
+    <!-- Is the version a prerelease of a version? https://docs.nuget.org/create/versioning#creating-prerelease-packages -->
+    <!-- Note that unstable versions like 0.0.1 can be considered a released version, but it's possible that one can release a 0.0.1-beta before you release a 0.0.1 version. If the version number is final, that is considered a released version and not a prerelease. -->
+    <version>2.24.0-alpha1</version>
+    <packageSourceUrl>https://github.com/alexis-opolka/navi/</packageSourceUrl>
+    <owners>Alexis Opolka</owners>
+    <!-- ============================== -->
+
+    <!-- == SOFTWARE SPECIFIC SECTION == -->
+    <title>navi-next (Install)</title>
+    <authors>Denis Idoro, Alexis Opolka</authors>
+    <projectUrl>https://github.com/denisidoro/navi</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/denisidoro/navi/master/assets/icon.png</iconUrl>
+    <copyright>2019-Present</copyright>
+    <licenseUrl>https://github.com/denisidoro/navi/blob/master/LICENSE</licenseUrl>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <projectSourceUrl>https://github.com/alexis-opolka/navi</projectSourceUrl>
+    <docsUrl>https://github.com/alexis-opolka/navi/tree/new-docs/docs</docsUrl>
+    <bugTrackerUrl>https://github.com/alexis-opolka/navi/issues</bugTrackerUrl>
+    <tags>navi-next development</tags>
+    <summary>A preview of what what's coming in navi.</summary>
+    <description>
+This package is the "next" version of navi, updated from a fork of denisidoro, the author,
+it is maintained and developed by alexis-opolka.
+
+All changes and new features appearing in this package might see themselves in a released
+version of navi but not all.
+
+You can decide to install this package to see what could become navi in the next versions.\
+If you prefer stable versions, please see either `navi-nightly` which is deployed from the
+latest commits on the upstream master branch or `navi-stable` which is the package of the
+last release of navi on GitHub.
+
+**Please Note**: This is a manually generated package, and is not considered stable.
+</description>
+    <releaseNotes>N/A as of beta-1</releaseNotes>
+    <!-- =============================== -->
+
+    <dependencies>
+    </dependencies>
+  </metadata>
+  <files>
+    <!-- this section controls what actually gets packaged into the Chocolatey package -->
+    <file src="tools\**" target="tools" />
+  </files>
+</package>
