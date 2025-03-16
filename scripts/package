@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+chocolatey-next(){
+  cargo build --target-dir dist/chocolatey/navi-next/cargo/
+  cp dist/chocolatey/navi-next/cargo/debug/navi dist/chocolatey/navi-next/tools/navi
+}
+
+help(){
+  if [ $# -eq 0 ]; then
+      echo Arguments are required, please enter one of the following packages: choco
+      exit 1
+  fi
+
+  if [ $1 == "choco" ]; then
+    echo "You can publish the following versions: next, nightly, stable"
+    exit 1
+  fi
+
+
+  ### Default help command if no command found
+  echo "No command found matching '$@'"
+  exit 1
+}
+
+if [ $# -eq 0 ]; then
+    help
+fi
+
+case "$@" in
+   "choco next") chocolatey-next "$@" ;;
+   "$@") help "$@" ;;
+esac
