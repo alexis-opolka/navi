@@ -78,10 +78,10 @@ jobs:
           
           cross build --release --target "${{ matrix.target }}"
           if is_windows "${{ matrix.target }}"; then
-            zip -r "navi-${{ steps.get_version.outputs.VERSION }}-${{ matrix.target }}.zip" "target/${{ matrix.target }}/release/navi.exe"
+            zip -r "navi.zip" "target/${{ matrix.target }}/release/navi.exe"
             echo "EXTENSION=zip" >> $GITHUB_OUTPUT
           else
-            tar -czf "navi-${{ steps.get_version.outputs.VERSION }}-${{ matrix.target }}.zip" "target/${{ matrix.target }}/release/navi"
+            tar -czf "navi.tar.gz" "target/${{ matrix.target }}/release/navi"
             echo "EXTENSION=tar.gz" >> $GITHUB_OUTPUT
           fi
           
@@ -91,7 +91,7 @@ jobs:
         with:
           overwrite: true
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: target/tar/navi.${{ steps.build.outputs.EXTENSION }}
+          file: navi.${{ steps.build.outputs.EXTENSION }}
           tag: ${{ steps.get_version.outputs.VERSION }}
           asset_name: navi-${{ steps.get_version.outputs.VERSION }}-${{ matrix.target }}.${{ steps.build.outputs.EXTENSION }}
 
