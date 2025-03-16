@@ -9,10 +9,9 @@ $softwareName = 'navi-next'
 $version = '2.24.0-alpha1'
 
 $alreadyInstalled = (AlreadyInstalled -product $softwareName -version $version)
-
 $installPath = Get-ChocolateyPath -PathType 'PackagePath'
 
-Write-Output "Path: $installPath"
+Write-Output $installPath
 
 if ($alreadyInstalled -and !$env:ChocolateyForce) {
   Write-Output $(
@@ -30,17 +29,7 @@ if (-Not(Test-Path $installPath)) {
   Get-ChildItem $installPath\* | ? { $_.PSISContainer } | Remove-Item -Recurse -Force
 }
 
-
-$packageArgs = @{
-  packageName    = $packageName
-  fileType       = 'exe'
-  softwareName   = "$softwareName*"
-  Checksum       = $checksum
-  ChecksumType   = 'sha512'
-  Url            = "https://github.com/alexis-opolka/navi/releases/download/v$version/navi-v$version-x86_64-pc-windows-gnu.zip"
-  silentArgs     = "$sa /S"
-  validExitCodes = @(0)
-}
-
-Move-Item "$env:SystemDrive\tools\navi-next\navi" "$installPath\navi\navi"
-Install-ChocolateyPath -PathToInstall "$installPath"
+# Download from an HTTPS location
+Get-ChocolateyWebFile -PackageName "$packageName" -FileFullPath "$toolsPath\$softwareName.zip" -Url "https://github.com/alexis-opolka/navi/releases/download/v$version/navi-v$version-x86_64-pc-windows-gnu.zip"
+Get-ChocolateyUnzip -FileFullPath "$toolsPath\$softwareName.zip" -Destination $toolsPath
+Install-ChocolateyPath -PathToInstall $toolsPath

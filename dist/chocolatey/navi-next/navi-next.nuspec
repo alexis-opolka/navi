@@ -32,7 +32,7 @@ This is a nuspec. It mostly adheres to https://docs.nuget.org/create/Nuspec-Refe
     <projectSourceUrl>https://github.com/alexis-opolka/navi</projectSourceUrl>
     <docsUrl>https://github.com/alexis-opolka/navi/tree/new-docs/docs</docsUrl>
     <bugTrackerUrl>https://github.com/alexis-opolka/navi/issues</bugTrackerUrl>
-    <tags>navi-next alpha1 development</tags>
+    <tags>navi-next development</tags>
     <summary>A preview of what what's coming in navi.</summary>
     <description>
 This package is the "next" version of navi, updated from a fork of denisidoro, the author,
