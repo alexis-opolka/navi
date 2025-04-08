@@ -4,6 +4,7 @@ use clap::{Args, Subcommand};
 
 pub mod add;
 pub mod browse;
+pub mod sync;
 
 #[derive(Debug, Clone, Subcommand)]
 pub enum RepoCommand {
@@ -14,6 +15,8 @@ pub enum RepoCommand {
     },
     /// Browses for featured cheatsheet repos
     Browse,
+    /// Synchronize all repos found in the cheats path
+    Sync,
 }
 
 #[derive(Debug, Clone, Args)]
@@ -28,12 +31,19 @@ impl Runnable for Input {
             RepoCommand::Add { uri } => {
                 add::main(uri.clone())
                     .with_context(|| format!("Failed to import cheatsheets from `{uri}`"))?;
-                commands::core::main()
+
+                Ok(())
+                // commands::core::main()
             }
             RepoCommand::Browse => {
                 let repo = browse::main().context("Failed to browse featured cheatsheets")?;
                 add::main(repo.clone())
                     .with_context(|| format!("Failed to import cheatsheets from `{repo}`"))?;
+                commands::core::main()
+            }
+            RepoCommand::Sync => {
+                let help = "";
+
                 commands::core::main()
             }
         }
