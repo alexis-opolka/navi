@@ -5,6 +5,7 @@ use crate::finder::FinderChoice;
 use crate::prelude::*;
 use std::fs;
 use std::path;
+use crate::config::Source::Filesystem;
 
 fn ask_if_should_import_all(finder: &FinderChoice) -> Result<bool> {
     let opts = FinderOpts {
@@ -25,7 +26,7 @@ fn ask_if_should_import_all(finder: &FinderChoice) -> Result<bool> {
     Ok(response.to_lowercase().starts_with('y'))
 }
 
-fn import_into_tmp_then_select(remote_uri: &String) -> Result<(), Error> {
+fn import_into_tmp_then_select(remote_uri: &String, destination_uri: Option<String>) -> Result<(), Error> {
     let tmp_pathbuf = filesystem::tmp_pathbuf()?;
     let tmp_path_str = &tmp_pathbuf.to_string();
 
@@ -36,27 +37,28 @@ fn import_into_tmp_then_select(remote_uri: &String) -> Result<(), Error> {
     .with_context(|| format!("Failed to clone `{remote_uri}`"))
 }
 
-fn  import_into_cheats_path(remote_uri: &String) -> Result<(), Error> {
+fn  import_into_cheats_path(remote_uri: &String, destination_uri: Option<String>) -> Result<(), Error> {
     let (repo_uri, user, repo) = git::meta(remote_uri.as_str());
-    let destination_uri =
+    let mut cheats_uri = destination_uri.unwrap_or(filesystem::default_cheat_pathbuf()?.to_string());
 
-    eprintln!("Cloning {} into {}...\n", repo_uri, destination_uri);
+    cheats_uri.push_str(format!("/{user}__{repo}").as_str());
 
-    git::shallow_clone(&repo_uri, &destination_uri)
+    eprintln!("Cloning {} into {}...\n", repo_uri, cheats_uri);
+
+    git::shallow_clone(&repo_uri, &cheats_uri)
     .with_context(|| format!("Failed to clone `{remote_uri}`"))
 }
 
 pub fn main(uri: String) -> Result<()> {
     let finder = CONFIG.finder();
+    let cheat_pathbuf = CONFIG.path();
 
     let should_import_all = ask_if_should_import_all(&finder).unwrap_or(false);
 
-    let cheat_pathbuf = filesystem::cheat_paths()?;
-
     return if should_import_all {
-        import_into_cheats_path(&uri)
+        import_into_cheats_path(&uri, cheat_pathbuf)
     } else {
-        import_into_tmp_then_select(&uri)
+        import_into_tmp_then_select(&uri, cheat_pathbuf)
     };
 
     // git::shallow_clone(actual_uri.as_str(), &cheat_pathbuf.to_string())
