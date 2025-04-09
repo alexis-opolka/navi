@@ -102,6 +102,17 @@ release() {
     ### We export a CI/CD variable to be used later in the pipeline
     echo "EXTENSION=zip" >> $GITHUB_OUTPUT
   else
+
+    ### @alexis-opolka - I'm currently disabling the usage of UPX since I cannot find how
+    ###     it was used before the merge of the code from the @denisidoro/dotfiles repository.
+    ###
+    #if upx --best --lzma "navi"; then
+    #  log::info "upx succeeded"
+    #else
+    #  log::info "upx failed"
+    #fi
+
+
     ### For all other targets, they have tar as the norm
     ### or have it installed by default.
     tar -czf "navi.tar.gz" "navi"
