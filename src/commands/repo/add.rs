@@ -3,9 +3,9 @@ use crate::filesystem;
 use crate::finder::structures::{Opts as FinderOpts, SuggestionType};
 use crate::finder::FinderChoice;
 use crate::prelude::*;
-use std::fs;
-use std::path;
-use crate::config::Source::Filesystem;
+use std::{fs, path};
+
+const source_file: &str = file!();
 
 fn ask_if_should_import_all(finder: &FinderChoice) -> Result<bool> {
     let opts = FinderOpts {
@@ -26,100 +26,102 @@ fn ask_if_should_import_all(finder: &FinderChoice) -> Result<bool> {
     Ok(response.to_lowercase().starts_with('y'))
 }
 
-fn import_into_tmp_then_select(remote_uri: &String, destination_uri: Option<String>) -> Result<(), Error> {
+fn import_into_tmp_then_select(remote_uri: &String, destination_uri: &String, finder: FinderChoice) -> Result<()> {
+    let (repo_uri, user, repo) = git::meta(remote_uri.as_str());
     let tmp_pathbuf = filesystem::tmp_pathbuf()?;
     let tmp_path_str = &tmp_pathbuf.to_string();
+    let mut definitive_uri = destination_uri.clone();
+    definitive_uri = definitive_uri + &format!("/{user}__{repo}");
 
     let _ = filesystem::remove_dir(&tmp_pathbuf);
     filesystem::create_dir(&tmp_pathbuf)?;
+    filesystem::create_dir(&path::PathBuf::from(&definitive_uri))?;
 
-    git::shallow_clone(remote_uri, tmp_path_str)
-    .with_context(|| format!("Failed to clone `{remote_uri}`"))
+    git::shallow_clone(&repo_uri, tmp_path_str)
+    .with_context(|| format!("Failed to clone `{repo_uri}`"))?;
+
+    let all_files = filesystem::all_cheat_files(&tmp_pathbuf).join("\n");
+    let git_files = filesystem::all_git_files(&tmp_pathbuf).join("\n");
+
+    let opts = FinderOpts {
+        suggestion_type: SuggestionType::MultipleSelections,
+        preview: Some(format!("cat '/{{}}'")),
+        header: Some("Select the cheatsheets you want to import with <TAB> then hit <Enter>\nUse Ctrl-R for (de)selecting all".to_string()),
+        preview_window: Some("right:30%".to_string()),
+        ..Default::default()
+    };
+
+    let files = {
+        let (files, _) = finder
+            .call(opts, |stdin| {
+                stdin
+                    .write_all(all_files.as_bytes())
+                    .context("Unable to prompt cheats to import")?;
+                Ok(())
+            })
+            .context("Failed to get cheatsheet files from finder")?;
+        files
+    };
+
+    for file in files.split('\n') {
+        let from = {
+            let mut p = tmp_pathbuf.clone();
+            p.push(file);
+            p
+        };
+
+        let filename = file
+            .replace(&format!("{}{}", &tmp_path_str, path::MAIN_SEPARATOR), "")
+            .replace(path::MAIN_SEPARATOR, "__");
+
+        let to = {
+            let p = definitive_uri.to_owned() + &format!("/{filename}");
+            p
+        };
+
+        fs::copy(&from, &to)
+            .with_context(|| format!("{} - Failed to copy `{}` to `{}`", source_file, &from.to_string(), &to.to_string()))?;
+    }
+
+    eprintln!("{git_files}");
+
+    // We are copying the `.git` folder to be able to sync the repository later on
+    for git_file in git_files.split('\n') {
+        let filename = git_file
+            .replace(&format!("{}{}", &tmp_path_str, path::MAIN_SEPARATOR), "");
+
+        let definitive_git_file = format!("{}/{}", &definitive_uri, &filename );
+        fs::copy(git_file, &definitive_git_file).with_context(|| format!("{} - Failed to copy `{}` to `{}`", source_file, git_file, definitive_git_file))?;
+    }
+
+    filesystem::remove_dir(&tmp_pathbuf)?;
+
+    Ok(())
 }
 
-fn  import_into_cheats_path(remote_uri: &String, destination_uri: Option<String>) -> Result<(), Error> {
+fn  import_into_cheats_path(remote_uri: &String, destination_uri: &String) -> Result<()> {
     let (repo_uri, user, repo) = git::meta(remote_uri.as_str());
-    let mut cheats_uri = destination_uri.unwrap_or(filesystem::default_cheat_pathbuf()?.to_string());
+    let mut cheats_uri = destination_uri.clone();
 
-    cheats_uri.push_str(format!("/{user}__{repo}").as_str());
+    cheats_uri = cheats_uri + &format!("/{user}__{repo}");
 
     eprintln!("Cloning {} into {}...\n", repo_uri, cheats_uri);
 
     git::shallow_clone(&repo_uri, &cheats_uri)
-    .with_context(|| format!("Failed to clone `{remote_uri}`"))
+    .with_context(|| format!("{} - Failed to clone `{remote_uri}`", source_file))
 }
 
 pub fn main(uri: String) -> Result<()> {
     let finder = CONFIG.finder();
-    let cheat_pathbuf = CONFIG.path();
+    let cheat_pathbuf = CONFIG.path().clone().unwrap_or(filesystem::default_cheat_pathbuf()?.to_string());
 
     let should_import_all = ask_if_should_import_all(&finder).unwrap_or(false);
 
     return if should_import_all {
-        import_into_cheats_path(&uri, cheat_pathbuf)
+        import_into_cheats_path(&uri, &cheat_pathbuf)
     } else {
-        import_into_tmp_then_select(&uri, cheat_pathbuf)
+        import_into_tmp_then_select(&uri, &cheat_pathbuf, finder)
     };
 
-    // git::shallow_clone(actual_uri.as_str(), &cheat_pathbuf.to_string())
-    //     .with_context(|| format!("Failed to clone `{actual_uri}`"))?;
-    //
-    // let all_files = filesystem::all_cheat_files(&tmp_pathbuf).join("\n");
-    //
-    // let opts = FinderOpts {
-    //     suggestion_type: SuggestionType::MultipleSelections,
-    //     preview: Some(format!("cat '{tmp_path_str}/{{}}'")),
-    //     header: Some("Select the cheatsheets you want to import with <TAB> then hit <Enter>\nUse Ctrl-R for (de)selecting all".to_string()),
-    //     preview_window: Some("right:30%".to_string()),
-    //     ..Default::default()
-    // };
-    //
-    // let files = if should_import_all {
-    //     all_files
-    // } else {
-    //     let (files, _) = finder
-    //         .call(opts, |stdin| {
-    //             stdin
-    //                 .write_all(all_files.as_bytes())
-    //                 .context("Unable to prompt cheats to import")?;
-    //             Ok(())
-    //         })
-    //         .context("Failed to get cheatsheet files from finder")?;
-    //     files
-    // };
-    //
-    // let to_folder = {
-    //     let mut p = cheat_pathbuf;
-    //     p.push(format!("{user}__{repo}"));
-    //     p
-    // };
-    //
-    // for file in files.split('\n') {
-    //     let from = {
-    //         let mut p = tmp_pathbuf.clone();
-    //         p.push(file);
-    //         p
-    //     };
-    //     let filename = file
-    //         .replace(&format!("{}{}", &tmp_path_str, path::MAIN_SEPARATOR), "")
-    //         .replace(path::MAIN_SEPARATOR, "__");
-    //     let to = {
-    //         let mut p = to_folder.clone();
-    //         p.push(filename);
-    //         p
-    //     };
-    //     fs::create_dir_all(&to_folder).unwrap_or(());
-    //     fs::copy(&from, &to)
-    //         .with_context(|| format!("Failed to copy `{}` to `{}`", &from.to_string(), &to.to_string()))?;
-    // }
-    //
-    // filesystem::remove_dir(&tmp_pathbuf)?;
-
-    // eprintln!(
-    //     "The following .cheat files were imported successfully:\n{}\n\nThey are now located at {}",
-    //     files,
-    //     to_folder.to_string()
-    // );
-
-    Ok(())
+    // Ok(())
 }

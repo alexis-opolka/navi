@@ -42,7 +42,7 @@ impl Runnable for Input {
                 commands::core::main()
             }
             RepoCommand::Sync => {
-                let help = "";
+                let _help = "";
 
                 commands::core::main()
             }

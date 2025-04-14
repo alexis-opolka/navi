@@ -8,6 +8,7 @@ use etcetera::BaseStrategy;
 use regex::Regex;
 
 use std::cell::RefCell;
+use std::fs;
 use std::path::MAIN_SEPARATOR;
 
 use walkdir::WalkDir;
@@ -27,6 +28,10 @@ pub fn all_cheat_files(path: &Path) -> Vec<String> {
         .map(|e| e.path().to_str().unwrap_or("").to_string())
         .filter(|e| e.ends_with(".cheat") || e.ends_with(".cheat.md"))
         .collect::<Vec<String>>()
+}
+
+pub fn copy_git_dir(src: impl AsRef<Path>, dest: impl AsRef<Path>) {
+    // https://stackoverflow.com/a/65192210/13025136
 }
 
 fn paths_from_path_param(env_var: &str) -> impl Iterator<Item = &str> {
