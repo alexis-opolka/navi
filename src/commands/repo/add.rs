@@ -41,7 +41,6 @@ fn import_into_tmp_then_select(remote_uri: &String, destination_uri: &String, fi
     .with_context(|| format!("Failed to clone `{repo_uri}`"))?;
 
     let all_files = filesystem::all_cheat_files(&tmp_pathbuf).join("\n");
-    let git_files = filesystem::all_git_files(&tmp_pathbuf).join("\n");
 
     let opts = FinderOpts {
         suggestion_type: SuggestionType::MultipleSelections,
@@ -83,17 +82,8 @@ fn import_into_tmp_then_select(remote_uri: &String, destination_uri: &String, fi
             .with_context(|| format!("{} - Failed to copy `{}` to `{}`", source_file, &from.to_string(), &to.to_string()))?;
     }
 
-    eprintln!("{git_files}");
-
     // We are copying the `.git` folder to be able to sync the repository later on
-    for git_file in git_files.split('\n') {
-        let filename = git_file
-            .replace(&format!("{}{}", &tmp_path_str, path::MAIN_SEPARATOR), "");
-
-        let definitive_git_file = format!("{}/{}", &definitive_uri, &filename );
-        fs::copy(git_file, &definitive_git_file).with_context(|| format!("{} - Failed to copy `{}` to `{}`", source_file, git_file, definitive_git_file))?;
-    }
-
+    filesystem::copy_git_dir(&tmp_path_str, &definitive_uri);
     filesystem::remove_dir(&tmp_pathbuf)?;
 
     Ok(())

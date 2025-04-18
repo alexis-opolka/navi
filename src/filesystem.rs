@@ -30,8 +30,25 @@ pub fn all_cheat_files(path: &Path) -> Vec<String> {
         .collect::<Vec<String>>()
 }
 
-pub fn copy_git_dir(src: impl AsRef<Path>, dest: impl AsRef<Path>) {
-    // https://stackoverflow.com/a/65192210/13025136
+pub fn copy_git_dir(src: impl AsRef<Path>, dest: impl AsRef<Path>) -> Result<()> {
+    // Inspired from: https://stackoverflow.com/a/65192210/13025136
+
+    WalkDir::new(src.as_ref())
+        .follow_links(true)
+        .into_iter()
+        .filter_map(|e| e.ok())
+        .map(|e| {
+            if e.path().is_dir() {
+                
+            }
+        });
+    
+    // We're creating our git folder structure recursively
+    fs::create_dir_all(dest)?;
+    
+
+
+    Ok(())
 }
 
 fn paths_from_path_param(env_var: &str) -> impl Iterator<Item = &str> {
