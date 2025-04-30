@@ -11,6 +11,8 @@ use std::cell::RefCell;
 use std::path::MAIN_SEPARATOR;
 
 use walkdir::WalkDir;
+use crate::env_var::is_var_history_enabled;
+use std::io::Write;
 
 /// Multiple paths are joint by a platform-specific separator.
 /// FIXME: it's actually incorrect to assume a path doesn't containing this separator
@@ -86,6 +88,64 @@ pub fn cheat_paths(path: Option<String>) -> Result<String> {
     } else {
         Ok(default_cheat_pathbuf()?.to_string())
     }
+}
+
+pub fn default_variables_history_pathbuf() -> Result<PathBuf> {
+    let mut pathbuf = get_data_dir_by_platform()?;
+
+    pathbuf.push("navi");
+    pathbuf.push("var.history");
+
+    Ok(pathbuf)
+}
+
+pub fn get_variable_history(variable: &str) -> Vec<String> {
+    // If the feature isn't enabled, exit immediately
+    if ! is_var_history_enabled() {
+        return vec![]
+    }
+
+    let pathbuf = default_variables_history_pathbuf().unwrap();
+    let file  = match File::open(pathbuf) {
+        Ok(file) => file,
+        Err(_) => return vec![],
+    };
+
+    let reader = BufReader::new(file);
+
+    reader
+        .lines()
+        .map_while(|line| line.ok())
+        .filter_map(|line| {
+            let parts: Vec<&str> = line.splitn(2, ':').collect();
+            if parts.len() == 2 && parts[0] == variable {
+                Some(parts[1].to_string())
+            } else {
+                None
+            }
+        })
+        .collect()
+}
+
+pub fn save_variable_history(variable: &str, value: &str) {
+    // If the feature isn't enabled, exit immediatly
+    if ! is_var_history_enabled() {
+        return;
+    }
+
+    let pathbuf = default_variables_history_pathbuf().unwrap();
+
+    // Create the file if it doesn't exist
+    if !pathbuf.exists() {
+        File::create(&pathbuf).unwrap();
+    }
+
+    let mut file = std::fs::OpenOptions::new()
+        .append(true)
+        .create(true)
+        .open(pathbuf)
+        .expect("Unable to open history file");
+    writeln!(file, "{}:{}", variable, value).expect("Unable to write to history file");
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

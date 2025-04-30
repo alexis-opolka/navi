@@ -19,6 +19,9 @@ pub const FINDER: &str = "NAVI_FINDER";
 pub const CONFIG: &str = "NAVI_CONFIG";
 pub const CONFIG_YAML: &str = "NAVI_CONFIG_YAML";
 
+// Currently not used but is here for reference
+//pub const VAR_HISTORY: &str = "NAVI_VAR_HISTORY";
+
 pub fn parse<T: FromStr>(varname: &str) -> Option<T> {
     if let Ok(x) = env::var(varname) {
         x.parse::<T>().ok()
@@ -37,4 +40,15 @@ pub fn must_get(name: &str) -> String {
 
 pub fn escape(name: &str) -> String {
     name.replace('-', "_")
+}
+
+
+pub fn is_var_history_enabled() -> bool {
+    if let Some(history) = option_env!("NAVI_VAR_HISTORY") {
+        if history == "true" { 
+            return true
+        }
+    }
+
+    false
 }
