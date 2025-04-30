@@ -128,7 +128,7 @@ pub fn get_variable_history(variable: &str) -> Vec<String> {
 }
 
 pub fn save_variable_history(variable: &str, value: &str) {
-    // If the feature isn't enabled, exit immediatly
+    // If the feature isn't enabled, exit immediately
     if ! is_var_history_enabled() {
         return;
     }
